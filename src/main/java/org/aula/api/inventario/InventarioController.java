@@ -70,6 +70,9 @@ public class InventarioController {
         if (itemDao.findById(request.idItem()) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item nao encontrado");
         }
+        if (request.quantidade() == null || request.quantidade() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade deve ser maior que zero");
+        }
         Inventario inventario = request.toEntity();
         return ResponseEntity.status(HttpStatus.CREATED).body(InventarioResponse.fromEntity(inventarioDao.create(inventario)));
     }
@@ -94,6 +97,9 @@ public class InventarioController {
         }
         if (itemDao.findById(request.idItem()) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item nao encontrado");
+        }
+        if (request.quantidade() == null || request.quantidade() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade deve ser maior que zero");
         }
         return InventarioResponse.fromEntity(inventarioDao.update(request.toEntity()));
     }
