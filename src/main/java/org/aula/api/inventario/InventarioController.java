@@ -80,6 +80,21 @@ public class InventarioController {
         if (request.id() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id e obrigatorio para atualizacao");
         }
+        if (inventarioDao.findById(request.id()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inventario nao encontrado");
+        }
+        if (request.idJogador() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogador e obrigatorio para o inventario");
+        }
+        if (request.idItem() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item e obrigatorio para o inventario");
+        }
+        if (jogadorDao.findById(request.idJogador()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador nao encontrado");
+        }
+        if (itemDao.findById(request.idItem()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item nao encontrado");
+        }
         return InventarioResponse.fromEntity(inventarioDao.update(request.toEntity()));
     }
 

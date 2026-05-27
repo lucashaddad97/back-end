@@ -50,8 +50,11 @@ public class ItemController {
     }
 
     @PostMapping
-    @Operation(summary = "Criar item", description = "Cria um novo item.")
+    @Operation(summary = "Criar item", description = "Cria um novo item. Nome é obrigatorio.")
     public ResponseEntity<ItemResponse> criar(@RequestBody ItemRequest request) {
+        if (request.nome() == null || request.nome().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome e obrigatorio para o item");
+        }
         Item item = request.toEntity();
         return ResponseEntity.status(HttpStatus.CREATED).body(ItemResponse.fromEntity(itemDao.create(item)));
     }
@@ -61,6 +64,9 @@ public class ItemController {
     public ItemResponse atualizar(@RequestBody ItemRequest request) {
         if (request.id() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id e obrigatorio para atualizacao");
+        }
+        if (itemDao.findById(request.id()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item nao encontrado");
         }
         return ItemResponse.fromEntity(itemDao.update(request.toEntity()));
     }

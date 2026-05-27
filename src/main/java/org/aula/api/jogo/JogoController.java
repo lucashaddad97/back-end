@@ -50,8 +50,11 @@ public class JogoController {
     }
 
     @PostMapping
-    @Operation(summary = "Criar jogo", description = "Cria um novo jogo.")
+    @Operation(summary = "Criar jogo", description = "Cria um novo jogo. Nome e obrigatorio.")
     public ResponseEntity<JogoResponse> criar(@RequestBody JogoRequest request) {
+        if (request.nome() == null || request.nome().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome e obrigatorio para o jogo");
+        }
         Jogo jogo = request.toEntity();
         return ResponseEntity.status(HttpStatus.CREATED).body(JogoResponse.fromEntity(jogoDao.create(jogo)));
     }
@@ -61,6 +64,9 @@ public class JogoController {
     public JogoResponse atualizar(@RequestBody JogoRequest request) {
         if (request.id() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id e obrigatorio para atualizacao");
+        }
+        if (jogoDao.findById(request.id()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogo nao encontrado");
         }
         return JogoResponse.fromEntity(jogoDao.update(request.toEntity()));
     }

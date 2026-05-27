@@ -50,8 +50,17 @@ public class JogadorController {
     }
 
     @PostMapping
-    @Operation(summary = "Criar jogador", description = "Cria um novo jogador.")
+    @Operation(summary = "Criar jogador", description = "Cria um novo jogador. Nome, nickname e email sao obrigatorios.")
     public ResponseEntity<JogadorResponse> criar(@RequestBody JogadorRequest request) {
+        if (request.nome() == null || request.nome().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome e obrigatorio para o jogador");
+        }
+        if (request.nickname() == null || request.nickname().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nickname e obrigatorio para o jogador");
+        }
+        if (request.email() == null || request.email().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email e obrigatorio para o jogador");
+        }
         Jogador jogador = request.toEntity();
         return ResponseEntity.status(HttpStatus.CREATED).body(JogadorResponse.fromEntity(jogadorDao.create(jogador)));
     }
@@ -61,6 +70,9 @@ public class JogadorController {
     public JogadorResponse atualizar(@RequestBody JogadorRequest request) {
         if (request.id() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id e obrigatorio para atualizacao");
+        }
+        if (jogadorDao.findById(request.id()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador nao encontrado");
         }
         return JogadorResponse.fromEntity(jogadorDao.update(request.toEntity()));
     }

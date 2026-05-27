@@ -2,6 +2,8 @@ package org.aula.api.partida;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.aula.dao.JogadorDao;
+import org.aula.dao.JogoDao;
 import org.aula.dao.PartidaDao;
 import org.aula.model.Partida;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,13 @@ import java.util.List;
 public class PartidaController {
 
     private final PartidaDao partidaDao;
+    private final JogadorDao jogadorDao;
+    private final JogoDao jogoDao;
 
-    public PartidaController(PartidaDao partidaDao) {
+    public PartidaController(PartidaDao partidaDao, JogadorDao jogadorDao, JogoDao jogoDao) {
         this.partidaDao = partidaDao;
+        this.jogadorDao = jogadorDao;
+        this.jogoDao = jogoDao;
     }
 
     @GetMapping
@@ -58,6 +64,12 @@ public class PartidaController {
         if (request.idJogo() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogo e obrigatorio para a partida");
         }
+        if (jogadorDao.findById(request.idJogador()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador nao encontrado");
+        }
+        if (jogoDao.findById(request.idJogo()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogo nao encontrado");
+        }
         Partida partida = request.toEntity();
         return ResponseEntity.status(HttpStatus.CREATED).body(PartidaResponse.fromEntity(partidaDao.create(partida)));
     }
@@ -68,7 +80,23 @@ public class PartidaController {
         if (request.id() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id e obrigatorio para atualizacao");
         }
-        return PartidaResponse.fromEntity(partidaDao.update(request.toEntity()));
+        if (partidaDao.findById(request.id()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida nao encontrada");
+        }
+        if (request.idJogador() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogador e obrigatorio para a partida");
+        }
+        if (request.idJogo() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogo e obrigatorio para a partida");
+        }
+        if (jogadorDao.findById(request.idJogador()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador nao encontrado");
+        }
+        if (jogoDao.findById(request.idJogo()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogo nao encontrado");
+        }
+        Partida partida = request.toEntity();
+        return PartidaResponse.fromEntity(partidaDao.update(partida));
     }
 
     @PostMapping("/{id}/delete")
