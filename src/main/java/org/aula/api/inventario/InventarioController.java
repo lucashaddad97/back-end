@@ -3,6 +3,8 @@ package org.aula.api.inventario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.aula.dao.InventarioDao;
+import org.aula.dao.ItemDao;
+import org.aula.dao.JogadorDao;
 import org.aula.model.Inventario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +24,13 @@ import java.util.List;
 public class InventarioController {
 
     private final InventarioDao inventarioDao;
+    private final JogadorDao jogadorDao;
+    private final ItemDao itemDao;
 
-    public InventarioController(InventarioDao inventarioDao) {
+    public InventarioController(InventarioDao inventarioDao, JogadorDao jogadorDao, ItemDao itemDao) {
         this.inventarioDao = inventarioDao;
+        this.jogadorDao = jogadorDao;
+        this.itemDao = itemDao;
     }
 
     @GetMapping
@@ -57,6 +63,12 @@ public class InventarioController {
         }
         if (request.idItem() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item e obrigatorio para o inventario");
+        }
+        if (jogadorDao.findById(request.idJogador()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador nao encontrado");
+        }
+        if (itemDao.findById(request.idItem()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item nao encontrado");
         }
         Inventario inventario = request.toEntity();
         return ResponseEntity.status(HttpStatus.CREATED).body(InventarioResponse.fromEntity(inventarioDao.create(inventario)));
